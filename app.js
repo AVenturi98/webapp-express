@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 6000;
 
 const notFoundError = require('./middlewares/notFound');
 const router = require('./routers/router')

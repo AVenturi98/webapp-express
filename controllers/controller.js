@@ -1,11 +1,14 @@
 const connection = require('../data/db')
 
 function index(_, res) {
-    // const sql = `SELECT * FROM 'movies'`
-    // connection.query(sql, _, res, (movies) => {
-    //     res.json(movies)
-    // })
-    res.json('Index')
+    const sql = 'SELECT * FROM `movies`'
+    connection.query(sql, (err, movies) => {
+        if (err) {
+            res.status(404).json({
+                message: 'Error'
+            })
+        } else res.json(movies)
+    })
 }
 
 function show(_, res) {
