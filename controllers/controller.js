@@ -14,12 +14,22 @@ function index(_, res) {
 
 function show(req, res) {
     const id = parseInt(req.params.id)
-    const sql = `SELECT * FROM movies WHERE id = ?`
-    connection.query(sql, [id], (_, result) => {
+    //recupero tutti gli id dai movies in maniera dinamica
+    const sql_movie = `SELECT * FROM movies WHERE id = ?`
 
+    connection.query(sql_movie, [id], (_, result) => {
+        if (isNaN(id)) res.status(404).json({ message: err.message })
+
+        if (result == 0) res.json({ error: 'error', message: 'this id is not available' })
+        //movie avrà il valore del primo elemento del mio array
         const movie = result[0]
-
-        res.json(movie)
+        //recupero tutti gli movie_id dalle reviews in maniera dinamica
+        const sql_rew = `SELECT * FROM reviews WHERE movie_id = ?`
+        connection.query(sql_rew, [id], (_, reviews) => {
+            //prendo il moive selezionato insieme alle reviews equivalenti all'id
+            movie.reviews = reviews
+            res.json(movie)
+        })
     })
 }
 
