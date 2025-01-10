@@ -9,11 +9,17 @@ function index(_, res) {
             })
         } else res.json(movies)
     })
+    //BONUS: recuperare la media di valutazione di ogni libro
 }
 
-function show(_, res) {
-    res.json({
-        message: 'Show'
+function show(req, res) {
+    const id = parseInt(req.params.id)
+    const sql = `SELECT * FROM movies WHERE id = ?`
+    connection.query(sql, [id], (_, result) => {
+
+        const movie = result[0]
+
+        res.json(movie)
     })
 }
 
