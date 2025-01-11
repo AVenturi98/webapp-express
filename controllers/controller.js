@@ -1,7 +1,9 @@
 const connection = require('../data/db')
 
 function index(_, res) {
+
     const sql = 'SELECT * FROM `movies`'
+
     connection.query(sql, (err, movies) => {
         if (err) {
             res.status(404).json({
@@ -13,7 +15,9 @@ function index(_, res) {
 }
 
 function show(req, res) {
+
     const id = parseInt(req.params.id)
+
     //recupero tutti gli id dai movies in maniera dinamica
     const sql_movie = `SELECT * FROM movies WHERE id = ?`
 
@@ -21,15 +25,28 @@ function show(req, res) {
         if (isNaN(id)) res.status(404).json({ message: err.message })
 
         if (result == 0) res.json({ error: 'error', message: 'this id is not available' })
+
         //movie avrà il valore del primo elemento del mio array
         const movie = result[0]
+
         //recupero tutti gli movie_id dalle reviews in maniera dinamica
         const sql_rew = `SELECT * FROM reviews WHERE movie_id = ?`
+        const sql_avg = `SELECT CEIL(AVG(vote)) as vote_avg FROM reviews WHERE movie_id = ?`
+
         connection.query(sql_rew, [id], (_, reviews) => {
-            //prendo il moive selezionato insieme alle reviews equivalenti all'id
+
+            //prendo il movie selezionato insieme alle reviews equivalenti all'id
             movie.reviews = reviews
-            res.json(movie)
+            connection.query(sql_avg, [id], (_, rev) => {
+
+                //prendo il movie selezionato insieme alle reviews equivalenti all'id
+                movie.vote = rev
+
+                res.json(movie)
+            })
+
         })
+
     })
 }
 

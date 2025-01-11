@@ -1,17 +1,15 @@
 const express = require('express');
+const cors = require('cors')
 const app = express();
-const port = process.env.PORT || 6000;
+const port = process.env.PORT || 3500;
 
 const notFoundError = require('./middlewares/notFound');
-const router = require('./routers/router')
+const movieRouter = require('./routers/router')
 
+app.use(cors())
 app.use(express.static('public'))
 
-app.get('/', (_, res) => {
-    res.send('Server is running')
-})
-
-app.use('/api/movies', router)
+app.use('/api/movies', movieRouter)
 
 app.use(notFoundError)
 
