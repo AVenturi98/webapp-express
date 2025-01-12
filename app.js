@@ -7,6 +7,7 @@ const notFoundError = require('./middlewares/notFound');
 const movieRouter = require('./routers/router')
 
 app.use(cors())
+app.use(express.json())
 app.use(express.static('public'))
 
 app.use('/api/movies', movieRouter)

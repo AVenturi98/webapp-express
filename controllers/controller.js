@@ -3,46 +3,56 @@ const connection = require('../data/db')
 function index(_, res) {
 
     const sql = 'SELECT * FROM `movies`'
+    //const sql_avg = `SELECT *, vote AS v FROM movies JOIN reviews ON movies.id = reviews.movie_id`
 
     connection.query(sql, (err, movies) => {
         if (err) {
             res.status(404).json({
                 message: 'Error'
             })
-        } else res.json(movies)
+        }
+        res.json(movies)
+
     })
     //BONUS: recuperare la media di valutazione di ogni libro
 }
 
 function show(req, res) {
 
-    const id = parseInt(req.params.id)
+    const { id } = req.params
 
     //recupero tutti gli id dai movies in maniera dinamica
     const sql_movie = `SELECT * FROM movies WHERE id = ?`
+    const sql_reviews = `
+    SELECT *, vote
+    FROM movies 
+    JOIN reviews 
+    ON movies.id = reviews.movie_id
+    WHERE reviews.movie_id = ?`
 
-    connection.query(sql_movie, [id], (_, result) => {
-        if (isNaN(id)) res.status(404).json({ message: err.message })
+    connection.query(sql_movie, [id], (err, result) => {
+        if (err) res.status(500).json({ message: err.message })
 
-        if (result == 0) res.json({ error: 'error', message: 'this id is not available' })
+        if (result == 0) res.status(404).json({ error: 'error', message: 'this id is not found' })
 
-        //movie avrà il valore del primo elemento del mio array
+        //movie avrà il valore dell' elemento del mio array
         const movie = result[0]
 
-        //recupero tutti gli movie_id dalle reviews in maniera dinamica
-        const sql_rew = `SELECT * FROM reviews WHERE movie_id = ?`
-        const sql_avg = `SELECT CEIL(AVG(vote)) as vote_avg FROM reviews WHERE movie_id = ?`
+        connection.query(sql_reviews, [id], (err, review) => {
 
-        connection.query(sql_rew, [id], (_, reviews) => {
+            if (err) res.status(500).json({ message: err.message })
 
-            //prendo il movie selezionato insieme alle reviews equivalenti all'id
-            movie.reviews = reviews
-            connection.query(sql_avg, [id], (_, rev) => {
+            // rinomino l'oggetto di ritorno
+            movie.reviews = review
 
-                //prendo il movie selezionato insieme alle reviews equivalenti all'id
-                movie.vote = rev
+            const sql_avg = `SELECT CEIL(AVG(vote)) as vote_avg FROM reviews WHERE movie_id = ?`
 
+            connection.query(sql_avg, [id], (err, avg) => {
+                if (err) res.status(500).json({ message: err.message })
+
+                movie.avg = avg
                 res.json(movie)
+
             })
 
         })
@@ -50,4 +60,17 @@ function show(req, res) {
     })
 }
 
-module.exports = { index, show }
+function post(req, res) {
+    const { movie_id, vote, name, text } = req.body
+    const sql_add = `
+        INSERT INTO reviews  ( movie_id, vote, name, text )
+        VALUES ( ?, ?, ?, ?)`
+
+    connection.query(sql_add, [movie_id, vote, name, text], (err, result) => {
+        if (err) res.status(500).json({ error: 'error', message: 'Not available' })
+
+        res.status(201).json(result)
+    })
+}
+
+module.exports = { index, show, post }
