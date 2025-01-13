@@ -6,6 +6,6 @@ router.get('/', controller.index)
 
 router.get('/:id', controller.show)
 
-router.post('/', controller.post)
+router.post('/:id/reviews', controller.post)
 
 module.exports = router

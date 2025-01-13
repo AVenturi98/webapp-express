@@ -2,15 +2,11 @@ const connection = require('../data/db')
 
 function index(_, res) {
 
+
     const sql = 'SELECT * FROM `movies`'
-    //const sql_avg = `SELECT *, vote AS v FROM movies JOIN reviews ON movies.id = reviews.movie_id`
 
     connection.query(sql, (err, movies) => {
-        if (err) {
-            res.status(404).json({
-                message: 'Error'
-            })
-        }
+        if (err) res.status(500).json({ message: 'Error' })
         res.json(movies)
 
     })
@@ -52,7 +48,6 @@ function show(req, res) {
 
                 movie.avg = avg
                 res.json(movie)
-
             })
 
         })
